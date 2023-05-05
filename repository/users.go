@@ -15,8 +15,8 @@ func GetUserById(ctx context.Context, id string) (*models.Profile, error) {
 func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	return implementation.GetUserByEmail(ctx, email)
 }
-func ListUsers(ctx context.Context, company string) ([]models.Profile, error) {
-	return implementation.ListUsers(ctx, company)
+func ListUsers(ctx context.Context) ([]models.Profile, error) {
+	return implementation.ListUsers(ctx)
 }
 func UpdateUser(ctx context.Context, data models.UpdateUser) (*models.Profile, error) {
 	return implementation.UpdateUser(ctx, data)

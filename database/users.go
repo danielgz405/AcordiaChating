@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dg/acordia/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,15 +12,11 @@ func (repo *MongoRepo) InsertUser(ctx context.Context, user *models.InsertUser) 
 	collection := repo.client.Database("Acordia").Collection("users")
 	result, err := collection.InsertOne(ctx, user)
 	if err != nil {
-		fmt.Println("1")
-		fmt.Println(err.Error())
 		return nil, err
 	}
 	oid := result.InsertedID.(primitive.ObjectID)
 	profile, err = repo.GetUserById(ctx, oid.Hex())
 	if err != nil {
-		fmt.Println("2")
-		fmt.Println(err.Error())
 		return nil, err
 	}
 	return profile, nil
@@ -60,10 +55,9 @@ func (repo *MongoRepo) GetUserByEmail(ctx context.Context, email string) (*model
 	}
 	return &user, nil
 }
-func (repo *MongoRepo) ListUsers(ctx context.Context, companyId string) ([]models.Profile, error) {
+func (repo *MongoRepo) ListUsers(ctx context.Context) ([]models.Profile, error) {
 	collection := repo.client.Database("Acordia").Collection("users")
-	oid, err := primitive.ObjectIDFromHex(companyId)
-	cursor, err := collection.Find(ctx, bson.M{"company": oid})
+	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}

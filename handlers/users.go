@@ -11,21 +11,20 @@ import (
 	"github.com/dg/acordia/responses"
 	"github.com/dg/acordia/server"
 	"github.com/golang-jwt/jwt"
-	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type SignUpLoginRequest struct {
-	Email    string   `json:"email"`
-	Password string   `json:"password"`
-	Name     string   `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
 }
 
 type UpdateUserRequest struct {
-	Name      string   `json:"name"`
-	Email     string   `json:"email"`
-	Image     string   `json:"image"`
-	DesertRef string   `json:"desertref"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Image     string `json:"image"`
+	DesertRef string `json:"desertref"`
 }
 
 func SignUpHandler(s server.Server) http.HandlerFunc {
@@ -113,9 +112,7 @@ func ListUsersHandler(s server.Server) http.HandlerFunc {
 		}
 		// Handle request
 		w.Header().Set("Content-Type", "application/json")
-		params := mux.Vars(r)
-		companyId := params["companyId"]
-		profiles, err := repository.ListUsers(r.Context(), companyId)
+		profiles, err := repository.ListUsers(r.Context())
 		if err != nil {
 			responses.NotFound(w, "Error getting users")
 			return
@@ -127,14 +124,12 @@ func ListUsersHandler(s server.Server) http.HandlerFunc {
 func UpdateUserHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//Token validation
-		_, err := middleware.ValidateToken(s, w, r)
-		// Roles validation
+		user, err := middleware.ValidateToken(s, w, r)
 		if err != nil {
 			return
 		}
 		// Handle request
 		w.Header().Set("Content-Type", "application/json")
-		params := mux.Vars(r)
 		var req = UpdateUserRequest{}
 		err = json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
@@ -142,7 +137,7 @@ func UpdateUserHandler(s server.Server) http.HandlerFunc {
 			return
 		}
 		data := models.UpdateUser{
-			Id:        params["id"],
+			Id:        user.Id.Hex(),
 			Name:      req.Name,
 			Email:     req.Email,
 			Image:     req.Image,
@@ -161,15 +156,13 @@ func UpdateUserHandler(s server.Server) http.HandlerFunc {
 func DeleteUserHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//Token validation
-		_, err := middleware.ValidateToken(s, w, r)
-		// Roles validation
+		user, err := middleware.ValidateToken(s, w, r)
 		if err != nil {
 			return
 		}
 		// Handle request
 		w.Header().Set("Content-Type", "application/json")
-		params := mux.Vars(r)
-		err = repository.DeleteUser(r.Context(), params["id"])
+		err = repository.DeleteUser(r.Context(), user.Id.Hex())
 		if err != nil {
 			responses.BadRequest(w, "Error deleting user")
 			return
