@@ -83,7 +83,7 @@ func UpdateChannelHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		// Token validation
-		_, _ = middleware.ValidateToken(s, w, r)
+		profile, _ := middleware.ValidateToken(s, w, r)
 		// Handle request
 		params := mux.Vars(r)
 		w.Header().Set("Content-Type", "application/json")
@@ -98,6 +98,13 @@ func UpdateChannelHandler(s server.Server) http.HandlerFunc {
 			responses.InternalServerError(w, err.Error())
 			return
 		}
+		neededChannelsWs := []string{params["id"]}
+		var stallMessage = models.WebsocketMessage{
+			Code:    "2",
+			Payload: updateChannel,
+			User:    profile.Name,
+		}
+		s.Hub().Broadcast(stallMessage, neededChannelsWs)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(updateChannel)
 	}
@@ -107,7 +114,7 @@ func DeleteChannelHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		// Token validation
-		_, _ = middleware.ValidateToken(s, w, r)
+		profile, _ := middleware.ValidateToken(s, w, r)
 		// Handle request
 		params := mux.Vars(r)
 		w.Header().Set("Content-Type", "application/json")
@@ -116,6 +123,13 @@ func DeleteChannelHandler(s server.Server) http.HandlerFunc {
 			responses.InternalServerError(w, err.Error())
 			return
 		}
+		neededChannelsWs := []string{params["id"]}
+		var stallMessage = models.WebsocketMessage{
+			Code:    "3",
+			Payload: params["id"],
+			User:    profile.Name,
+		}
+		s.Hub().Broadcast(stallMessage, neededChannelsWs)
 		responses.DeleteResponse(w, "Channel deleted")
 	}
 }
@@ -124,7 +138,7 @@ func AddUserToChannelHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		// Token validation
-		_, _ = middleware.ValidateToken(s, w, r)
+		profile, _ := middleware.ValidateToken(s, w, r)
 		// Handle request
 		params := mux.Vars(r)
 		w.Header().Set("Content-Type", "application/json")
@@ -133,6 +147,13 @@ func AddUserToChannelHandler(s server.Server) http.HandlerFunc {
 			responses.InternalServerError(w, err.Error())
 			return
 		}
+		neededChannelsWs := []string{params["id"]}
+		var stallMessage = models.WebsocketMessage{
+			Code:    "2",
+			Payload: channel,
+			User:    profile.Name,
+		}
+		s.Hub().Broadcast(stallMessage, neededChannelsWs)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(channel)
 	}
@@ -169,6 +190,13 @@ func AddMessagesToChannelHandler(s server.Server) http.HandlerFunc {
 			responses.InternalServerError(w, err.Error())
 			return
 		}
+		neededChannelsWs := []string{params["id"]}
+		var stallMessage = models.WebsocketMessage{
+			Code:    "2",
+			Payload: insertMessage,
+			User:    profile.Name,
+		}
+		s.Hub().Broadcast(stallMessage, neededChannelsWs)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(insertMessage)
 	}
@@ -178,7 +206,7 @@ func RemoveUserHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		// Token validation
-		_, _ = middleware.ValidateToken(s, w, r)
+		profile, _ := middleware.ValidateToken(s, w, r)
 		// Handle request
 		params := mux.Vars(r)
 		w.Header().Set("Content-Type", "application/json")
@@ -187,6 +215,13 @@ func RemoveUserHandler(s server.Server) http.HandlerFunc {
 			responses.InternalServerError(w, err.Error())
 			return
 		}
+		neededChannelsWs := []string{params["id"]}
+		var stallMessage = models.WebsocketMessage{
+			Code:    "2",
+			Payload: removeUser,
+			User:    profile.Name,
+		}
+		s.Hub().Broadcast(stallMessage, neededChannelsWs)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(removeUser)
 	}

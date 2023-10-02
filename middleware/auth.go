@@ -9,6 +9,7 @@ import (
 	"github.com/dg/acordia/responses"
 	"github.com/dg/acordia/server"
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -17,10 +18,22 @@ var (
 		"login",
 		"signup",
 	}
+	AUTH_BY_PARAMS = []string{
+		"ws",
+	}
 )
 
 func shouldCheckAuth(route string) bool {
 	for _, p := range NO_AUTH_NEEDED {
+		if strings.Contains(route, p) {
+			return false
+		}
+	}
+	return true
+}
+
+func authByParams(route string) bool {
+	for _, p := range AUTH_BY_PARAMS {
 		if strings.Contains(route, p) {
 			return false
 		}
@@ -36,6 +49,10 @@ func CheckAuthMiddleware(s server.Server) func(h http.Handler) http.Handler {
 				return
 			}
 			tokenString := strings.TrimSpace(r.Header.Get("Authorization"))
+			if !authByParams(r.URL.Path) {
+				params := mux.Vars(r)
+				tokenString = strings.TrimSpace(params["Authorization"])
+			}
 			_, err := jwt.ParseWithClaims(tokenString, &models.AppClaims{}, func(token *jwt.Token) (interface{}, error) {
 				return []byte(s.Config().JWTSecret), nil
 			})

@@ -58,4 +58,7 @@ func BindRoutes(s server.Server, r *mux.Router) {
 	r.HandleFunc("/channel/event/removeUser/{id}/{user}", handlers.RemoveUserHandler(s)).Methods(http.MethodPatch)
 	r.HandleFunc("/channel/event/addMessage/{id}", handlers.AddMessagesToChannelHandler(s)).Methods(http.MethodPatch)
 	r.HandleFunc("/channel/list", handlers.ListOfChannelsHandler(s)).Methods(http.MethodGet)
+
+	// WebSocket
+	r.HandleFunc("/ws/{Authorization}/{Channel}", s.Hub().HandleWebSocket(s.Config().JWTSecret))
 }
